@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "MainWindow.h"
-#include "d3d12Helpers.h"
+#include "Renderer.h"
 
 namespace winrt
 {
@@ -33,33 +33,19 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
     root.Brush(compositor.CreateColorBrush(winrt::Colors::White()));
     target.Root(root);
 
-    // Init D3D12
-    auto dxgiFactory = util::CreateDXGIFactory();
-    auto d3d12Device = util::CreateD3D12Device(dxgiFactory);
-    auto d3d12Queue = util::CreateD3D12CommandQueue(d3d12Device);
-
-    // Create our swap chain
-    DXGI_SWAP_CHAIN_DESC1 desc = {};
-    desc.Width = 800;
-    desc.Height = 600;
-    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    desc.SampleDesc.Count = 1;
-    desc.SampleDesc.Quality = 0;
-    desc.BufferCount = 2;
-    desc.Scaling = DXGI_SCALING_STRETCH;
-    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-    desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
-    winrt::com_ptr<IDXGISwapChain1> swapChain;
-    winrt::check_hresult(dxgiFactory->CreateSwapChainForComposition(d3d12Queue.get(), &desc, nullptr, swapChain.put()));
+    // Init our renderer
+    auto renderer = Renderer(800, 600);
+    
+    // Attach our swap chain to the visual tree
+    auto swapChain = renderer.SwapChain();
     auto surface = util::CreateCompositionSurfaceForSwapChain(compositor, swapChain.get());
     auto visual = compositor.CreateSpriteVisual();
     visual.RelativeSizeAdjustment({ 1.0f, 1.0f });
     visual.Brush(compositor.CreateSurfaceBrush(surface));
     root.Children().InsertAtTop(visual);
 
-    // Setup our pipeline
-
+    // Render
+    renderer.Render();
 
     // Message pump
     MSG msg = {};

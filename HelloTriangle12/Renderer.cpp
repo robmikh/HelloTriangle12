@@ -50,8 +50,6 @@ Renderer::Renderer(uint32_t width, uint32_t height) :
 
     LoadPipeline();
     LoadAssets();
-
-
 }
 
 void Renderer::Render()
